@@ -11,6 +11,6 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 Now you have several options.
 
-- `Cargo run --release -- [Assembly File path]`: run the interpreter directly.
+- `cargo run --release -- [Assembly File path]`: run the interpreter directly.
 
-- `Cargo build --release`: build the binary at `./target/release/main`.
+- `cargo build --release`: build the binary at `./target/release/main`.
