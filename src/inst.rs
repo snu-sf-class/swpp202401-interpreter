@@ -1374,7 +1374,7 @@ impl InstUnsignedDivision {
     pub fn run(&self, reg_set: &mut SwppRegisterSet, logger: &mut SwppLogger) -> SwppRawResult<()> {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
-        let val = val1 / val2;
+        let val = self.bw.read_u64(val1 / val2);
 
         logger.log_op(format!("{val1}/{val2} = {val}"));
 
@@ -1399,7 +1399,7 @@ impl InstSignedDivision {
         let val1: i64 = unsafe { std::mem::transmute(val1) };
         let val2: i64 = unsafe { std::mem::transmute(val2) };
 
-        let val = val1 / val2;
+        let val = self.bw.read_i64(val1 / val2);
         logger.log_op(format!("{val1}/{val2} = {val}"));
 
         let val = unsafe { std::mem::transmute(val) };
@@ -1422,7 +1422,7 @@ impl InstUnsignedRemainder {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        let val = val1 % val2;
+        let val = self.bw.read_u64(val1 % val2);
 
         logger.log_op(format!("{val1}%{val2} = {val}"));
 
@@ -1446,7 +1446,7 @@ impl InstSignedRemainder {
         let val1: i64 = unsafe { std::mem::transmute(val1) };
         let val2: i64 = unsafe { std::mem::transmute(val2) };
 
-        let val = val1 % val2;
+        let val = self.bw.read_i64(val1 % val2);
 
         logger.log_op(format!("{val1}%{val2} = {val}"));
 
@@ -1470,7 +1470,7 @@ impl InstMultiplication {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        let val = val1.wrapping_mul(val2);
+        let val = self.bw.read_u64(val1.wrapping_mul(val2));
 
         logger.log_op(format!("{val1}*{val2} = {val}"));
 
@@ -1491,7 +1491,7 @@ impl InstShiftLeft {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        let val = val1 << val2;
+        let val = self.bw.read_u64(val1 << val2);
 
         logger.log_op(format!("{val1}<<{val2} = {val}"));
 
@@ -1512,7 +1512,7 @@ impl InstShiftRightLogical {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        let val = val1 >> val2;
+        let val = self.bw.read_u64(val1 >> val2);
 
         logger.log_op(format!("{val1}>>{val2} = {val}"));
 
@@ -1535,7 +1535,7 @@ impl InstShiftRightArithmetic {
 
         let val1: i64 = unsafe { std::mem::transmute(val1) };
 
-        let val = val1 >> val2;
+        let val = self.bw.read_i64(val1 >> val2);
         logger.log_op(format!("{val1}>>{val2} = {val}"));
         let val = unsafe { std::mem::transmute(val) };
         reg_set.write_register_word(&self.target_reg, val)
@@ -1555,7 +1555,7 @@ impl InstBitwiseAnd {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        reg_set.write_register_word(&self.target_reg, val1 & val2)
+        reg_set.write_register_word(&self.target_reg, self.bw.read_u64(val1 & val2))
     }
 }
 
@@ -1572,7 +1572,7 @@ impl InstBitwiseOr {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        reg_set.write_register_word(&self.target_reg, val1 | val2)
+        reg_set.write_register_word(&self.target_reg, self.bw.read_u64(val1 | val2))
     }
 }
 
@@ -1589,7 +1589,7 @@ impl InstBitwiseXor {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        reg_set.write_register_word(&self.target_reg, val1 ^ val2)
+        reg_set.write_register_word(&self.target_reg, self.bw.read_u64(val1 ^ val2))
     }
 }
 
@@ -1606,7 +1606,7 @@ impl InstAdd {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        let val = val1.wrapping_add(val2);
+        let val = self.bw.read_u64(val1.wrapping_add(val2));
         logger.log_op(format!("{val1}+{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
@@ -1626,7 +1626,7 @@ impl InstSub {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
-        let val = val1.wrapping_sub(val2);
+        let val = self.bw.read_u64(val1.wrapping_sub(val2));
         logger.log_op(format!("{val1}-{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
@@ -1644,7 +1644,7 @@ impl InstIncrement {
     pub fn run(&self, reg_set: &mut SwppRegisterSet) -> SwppRawResult<()> {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
 
-        let val = val1.wrapping_add(1);
+        let val = self.bw.read_u64(val1.wrapping_add(1));
 
         reg_set.write_register_word(&self.target_reg, val)
     }
@@ -1661,7 +1661,7 @@ impl InstDecrement {
     pub fn run(&self, reg_set: &mut SwppRegisterSet) -> SwppRawResult<()> {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
 
-        let val = val1.wrapping_sub(1);
+        let val = self.bw.read_u64(val1.wrapping_sub(1));
 
         reg_set.write_register_word(&self.target_reg, val)
     }

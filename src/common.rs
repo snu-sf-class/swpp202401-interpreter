@@ -61,7 +61,23 @@ impl BitWidth {
     pub fn read_u64(&self, val: u64) -> u64 {
         let bit: u64 = self.clone().into();
         let shift = 64 - bit;
-        (val << shift) >> shift
+        if shift == 0 {
+            val
+        } else {
+            let mask = (1u64 << bit) - 1;
+            val & mask
+        }
+    }
+
+    pub fn read_i64(&self, val: i64) -> i64 {
+        let bit: u64 = self.clone().into();
+        let shift = 64 - bit;
+        if shift == 0 {
+            val
+        } else {
+            let mask = (1i64 << bit) - 1;
+            val & mask
+        }
     }
 }
 
