@@ -200,7 +200,7 @@ impl<'a> SwppProgram {
     }
 
     pub fn total_cost(&self) -> u64 {
-        self.state.cur_cost + self.state.mem.get_max_heap_size()
+        self.state.cur_cost + self.state.mem.get_max_heap_size() * 1024
     }
 
     pub fn run(&mut self) -> SwppResult<()> {
