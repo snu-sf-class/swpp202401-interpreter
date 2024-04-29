@@ -63,6 +63,12 @@ impl BitWidth {
         let shift = 64 - bit;
         (val << shift) >> shift
     }
+
+    pub fn read_i64(&self, val: i64) -> i64 {
+        let bit: u64 = self.clone().into();
+        let shift = 64 - bit;
+        (val << shift) >> shift
+    }
 }
 
 impl From<u64> for BitWidth {
