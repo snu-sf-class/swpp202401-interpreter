@@ -1089,7 +1089,6 @@ impl InstFunctionCall {
 /// Function call
 pub struct InstRecursiveCall {
     target: Option<SwppRegisterName>,
-    fname: String,
     args: Vec<SwppRegisterName>,
 }
 
@@ -1100,26 +1099,16 @@ impl InstRecursiveCall {
         reg_set: &mut SwppRegisterSet,
         logger: &mut SwppLogger,
     ) -> SwppRawResult<()> {
-        let mut function = state.get_fn_by_name(&self.fname)?.clone();
+        let context_fname = state.get_context().get_fname();
+        let mut function = state.get_fn_by_name(&context_fname)?.clone();
 
         // Recursive Call 가능한지 검사
         // 1. 현재 실행중인 함수만 재귀호출 가능
-        let context = state.get_context().get_fname();
-        if context != self.fname {
-            return Err(SwppErrorKind::InvalidRecursiveCall(
-                self.fname.to_owned(),
-                context.to_owned(),
-            ));
-        }
-        // 2. 메인함수는 재귀호출 불가능
-        if context == ".main" {
-            return Err(SwppErrorKind::RecursiveMainCall);
-        }
 
         // Argument 갯수 검사
         if self.args.len() as u64 != function.nargs() {
             return Err(SwppErrorKind::WrongArgNum(
-                self.fname.clone(),
+                context_fname.clone(),
                 function.nargs(),
                 self.args.len() as u64,
             ));
@@ -1133,13 +1122,15 @@ impl InstRecursiveCall {
 
         let ret_val = function
             .run(state, reg_set, arg_set?, logger)
-            .map_err(|err| SwppErrorKind::FunctionCallCrash(self.fname.clone(), err.to_string()))?;
+            .map_err(|err| {
+                SwppErrorKind::FunctionCallCrash(context_fname.clone(), err.to_string())
+            })?;
 
         if let Some(reg) = &self.target {
             if let Some(val) = ret_val {
                 reg_set.write_register_word(reg, val)
             } else {
-                Err(SwppErrorKind::AssignNoValue(self.fname.clone()))
+                Err(SwppErrorKind::AssignNoValue(context_fname.clone()))
             }
         } else {
             Ok(())

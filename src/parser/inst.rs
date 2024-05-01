@@ -171,10 +171,10 @@ fn fcall_assign_parser(input: &str) -> IResult<&str, SwppInst> {
 fn rcall_parser(input: &str) -> IResult<&str, SwppInst> {
     let (input, line_num) = line_num_parser(input)?;
     let (rem, _) = tag("rcall")(input)?;
-    let (rem, fname) = preceded(space0, fname_parser)(rem)?;
+    // let (rem, fname) = preceded(space0, fname_parser)(rem)?;
     let (rem, args) = many0(preceded(space0, reg_parser))(rem)?;
 
-    let inst = InstRecursiveCall::new(None, fname.to_owned(), args);
+    let inst = InstRecursiveCall::new(None, args);
     let inst = SwppInst::new(SwppInstKind::RCall(inst), line_num);
     Ok((rem, inst))
 }
@@ -184,10 +184,10 @@ fn rcall_assign_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, target) = reg_parser(input)?;
     let (rem, _) = tuple((space0, tag("="), space0))(rem)?;
     let (rem, _) = tag("rcall")(rem)?;
-    let (rem, fname) = preceded(space0, fname_parser)(rem)?;
+    // let (rem, fname) = preceded(space0, fname_parser)(rem)?;
     let (rem, args) = many0(preceded(space0, reg_parser))(rem)?;
 
-    let inst = InstRecursiveCall::new(Some(target), fname.to_owned(), args);
+    let inst = InstRecursiveCall::new(Some(target), args);
     let inst = SwppInst::new(SwppInstKind::RCall(inst), line_num);
     Ok((rem, inst))
 }

@@ -1,5 +1,4 @@
 use crate::register::SwppRegisterName;
-
 pub const MEM_STACK_SIZE: u64 = 102400;
 pub const MAIN_NAME: &str = "main";
 pub const INTERNAL_ERROR_MSG: &str =
