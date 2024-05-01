@@ -25,25 +25,27 @@ fn numbered_reg_parser(input: &str) -> IResult<&str, SwppRegisterName> {
 
     let register_idx = idx
         .parse()
-        .expect(&format!("{} : {rem} {idx}", INVALID_REGISTER_IDX));
+        .map_err(|_|
+            nom::Err::Error(nom::error::Error::new(INVALID_REGISTER_IDX, nom::error::ErrorKind::Fail))
+        )?;
     match reg_type {
         "r" => {
             if register_idx > 32 {
-                panic!("{}", INVALID_REGISTER_IDX)
+                return Err(nom::Err::Error(nom::error::Error::new(INVALID_REGISTER_IDX, nom::error::ErrorKind::Fail)));
             } else {
                 Ok((rem, SwppRegisterName::Gen(register_idx)))
             }
         }
         "v" => {
             if register_idx > 16 {
-                panic!("{}", INVALID_REGISTER_IDX)
+                return Err(nom::Err::Error(nom::error::Error::new(INVALID_REGISTER_IDX, nom::error::ErrorKind::Fail)));
             } else {
                 Ok((rem, SwppRegisterName::Vec(register_idx)))
             }
         }
         "arg" => {
             if register_idx > 16 {
-                panic!("{}", INVALID_REGISTER_IDX)
+                return Err(nom::Err::Error(nom::error::Error::new(INVALID_REGISTER_IDX, nom::error::ErrorKind::Fail)));
             } else {
                 Ok((rem, SwppRegisterName::Argument(register_idx)))
             }
