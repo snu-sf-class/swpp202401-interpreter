@@ -1099,7 +1099,6 @@ impl InstRecursiveCall {
         reg_set: &mut SwppRegisterSet,
         logger: &mut SwppLogger,
     ) -> SwppRawResult<()> {
-        
         let context_fname = state.get_context().get_fname();
         let mut function = state.get_fn_by_name(&context_fname)?.clone();
 
@@ -1123,7 +1122,9 @@ impl InstRecursiveCall {
 
         let ret_val = function
             .run(state, reg_set, arg_set?, logger)
-            .map_err(|err| SwppErrorKind::FunctionCallCrash(context_fname.clone(), err.to_string()))?;
+            .map_err(|err| {
+                SwppErrorKind::FunctionCallCrash(context_fname.clone(), err.to_string())
+            })?;
 
         if let Some(reg) = &self.target {
             if let Some(val) = ret_val {
