@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_while1},
@@ -35,7 +37,7 @@ use crate::{
 
 use super::{
     block::bname_parser,
-    common::{ParserResult, INVALID_BW, INVALID_CONST, INVALID_ICMP, INVALID_SIZE},
+    common::{gen_nom_err, ParserResult, INVALID_BW, INVALID_CONST, INVALID_ICMP, INVALID_SIZE},
     function::fname_parser,
 };
 
@@ -73,6 +75,7 @@ pub fn inst_parser(input: &str) -> IResult<&str, ParserResult> {
         broadcast_parser,
         extract_parser,
         update_parser,
+        vec_ternary_parser,
     ))(inst)?;
 
     Ok((ret_val, ParserResult::Inst(inst)))
@@ -136,8 +139,11 @@ fn switch_parser(input: &str) -> IResult<&str, SwppInst> {
 
     let jump_vec = jump_vec
         .into_iter()
-        .map(|(val, block)| (val.parse().expect(INVALID_CONST), block.to_owned()))
-        .collect();
+        .map(|(val, block)| match val.parse() {
+            Ok(cst) => Ok((cst, block.to_owned())),
+            Err(_) => Err(gen_nom_err(&INVALID_CONST)),
+        })
+        .collect::<Result<HashMap<u64, String>, _>>()?;
 
     let inst = InstSwitch::new(cond_reg, jump_vec, default.to_string());
     let inst = SwppInst::new(SwppInstKind::Switch(inst), line_num);
@@ -250,7 +256,7 @@ fn load_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, _) = tuple((space0, tag("="), space0))(rem)?;
     let (rem, _) = tag("load")(rem)?;
     let (rem, size) = preceded(space0, size_parser)(rem)?;
-    let size = size.expect(&format!("{} : {}", INVALID_SIZE, line_num));
+    let size = size.ok_or(gen_nom_err(&INVALID_SIZE))?;
     let (rem, addr_reg) = preceded(space0, reg_parser)(rem)?;
 
     let inst = InstLoad::new(target, addr_reg, size);
@@ -262,7 +268,7 @@ fn store_parser(input: &str) -> IResult<&str, SwppInst> {
     let (input, line_num) = line_num_parser(input)?;
     let (rem, _) = tag("store")(input)?;
     let (rem, size) = preceded(space0, size_parser)(rem)?;
-    let size = size.expect(&format!("{} : {}", INVALID_SIZE, line_num));
+    let size = size.ok_or(gen_nom_err(&INVALID_SIZE))?;
     let (rem, val_reg) = preceded(space0, reg_parser)(rem)?;
 
     // println!("1:{:?}",val_reg);
@@ -367,7 +373,7 @@ fn binary_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, lhs) = preceded(space0, reg_parser)(rem)?;
     let (rem, rhs) = preceded(space0, reg_parser)(rem)?;
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
-    let bw = bw.expect(&format!("{} : {}", INVALID_BW, line_num));
+    let bw = bw.ok_or(gen_nom_err(&INVALID_BW))?;
 
     let inst = match op {
         "udiv" => {
@@ -527,7 +533,7 @@ fn unary_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, op) = alt((tag("incr"), tag("decr"), tag("vincr"), tag("vdecr")))(rem)?;
     let (rem, reg) = preceded(space0, reg_parser)(rem)?;
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
-    let bw = bw.expect(&format!("{} : {}", INVALID_BW, line_num));
+    let bw = bw.ok_or(gen_nom_err(&INVALID_BW))?;
 
     let inst = match op {
         "incr" => {
@@ -573,7 +579,9 @@ fn icmp_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, reg1) = preceded(space0, reg_parser)(rem)?;
     let (rem, reg2) = preceded(space0, reg_parser)(rem)?;
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
-    let bw = bw.expect(&format!("{} : {}", INVALID_BW, line_num));
+
+    let bw = bw.ok_or(gen_nom_err(INVALID_BW))?;
+
     let inst = match op {
         "icmp" => {
             let inst = InstComparison::new(reg1, reg2, cond, target, bw);
@@ -597,20 +605,32 @@ fn ternary_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, target) = reg_parser(input)?;
     let (rem, _) = tuple((space0, tag("="), space0))(rem)?;
 
-    let (rem, op) = alt((tag("select"), tag("vselect"), tag("vpselect")))(rem)?;
+    let (rem, _) = tag("select")(rem)?;
+
+    let (rem, cond_reg) = preceded(space0, reg_parser)(rem)?;
+    let (rem, true_reg) = preceded(space0, reg_parser)(rem)?;
+    let (rem, false_reg) = preceded(space0, reg_parser)(rem)?;
+    let inst = InstTernary::new(false_reg, true_reg, cond_reg, target);
+    let inst = SwppInst::new(SwppInstKind::Select(inst), line_num);
+
+    Ok((rem, inst))
+}
+
+fn vec_ternary_parser(input: &str) -> IResult<&str, SwppInst> {
+    let (input, line_num) = line_num_parser(input)?;
+    let (rem, target) = reg_parser(input)?;
+    let (rem, _) = tuple((space0, tag("="), space0))(rem)?;
+
+    let (rem, op) = alt((tag("vselect"), tag("vpselect")))(rem)?;
 
     let (rem, cond_reg) = preceded(space0, reg_parser)(rem)?;
     let (rem, true_reg) = preceded(space0, reg_parser)(rem)?;
     let (rem, false_reg) = preceded(space0, reg_parser)(rem)?;
 
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
-    let bw = bw.expect(&format!("{} : {}", INVALID_BW, line_num));
+    let bw = bw.ok_or(gen_nom_err(INVALID_BW))?;
 
     let inst = match op {
-        "select" => {
-            let inst = InstTernary::new(false_reg, true_reg, cond_reg, target);
-            SwppInst::new(SwppInstKind::Select(inst), line_num)
-        }
         "vselect" => {
             let inst = InstVectorTernary::new(false_reg, true_reg, cond_reg, target, bw);
             SwppInst::new(SwppInstKind::Vselect(inst), line_num)
@@ -632,7 +652,7 @@ fn move_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, _) = tag("const")(rem)?;
 
     let (rem, cst) = preceded(space0, digit1)(rem)?;
-    let cst = cst.parse().expect(INVALID_CONST);
+    let cst = cst.parse().map_err(|_| gen_nom_err(INVALID_CONST))?;
 
     let inst = InstConst::new(target, cst);
     let inst = SwppInst::new(SwppInstKind::Const(inst), line_num);
@@ -647,7 +667,7 @@ fn broadcast_parser(input: &str) -> IResult<&str, SwppInst> {
 
     let (rem, reg) = preceded(space0, reg_parser)(rem)?;
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
-    let bw = bw.expect(&format!("{} : {}", INVALID_BW, line_num));
+    let bw = bw.ok_or(gen_nom_err(INVALID_BW))?;
 
     let inst = InstVectorBroadcast::new(target, reg, bw);
     let inst = SwppInst::new(SwppInstKind::Vbcast(inst), line_num);
@@ -664,7 +684,7 @@ fn extract_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, idx) = preceded(space0, reg_parser)(rem)?;
 
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
-    let bw = bw.expect(&format!("{} : {}", INVALID_BW, line_num));
+    let bw = bw.ok_or(gen_nom_err(INVALID_BW))?;
 
     let inst = InstVectorExtract::new(reg, target, idx, bw);
     let inst = SwppInst::new(SwppInstKind::Vextct(inst), line_num);
@@ -682,7 +702,7 @@ fn update_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, idx) = preceded(space0, reg_parser)(rem)?;
 
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
-    let bw = bw.expect(&format!("{} : {}", INVALID_BW, line_num));
+    let bw = bw.ok_or(gen_nom_err(INVALID_BW))?;
 
     let inst = InstVectorUpdate::new(vec_reg, target, reg, idx, bw);
     let inst = SwppInst::new(SwppInstKind::Vupdate(inst), line_num);
