@@ -23,29 +23,39 @@ fn numbered_reg_parser(input: &str) -> IResult<&str, SwppRegisterName> {
     let (rem, reg_type) = alt((tag("r"), tag("v"), tag("arg")))(input)?;
     let (rem, idx) = digit0(rem)?;
 
-    let register_idx = idx
-        .parse()
-        .map_err(|_|
-            nom::Err::Error(nom::error::Error::new(INVALID_REGISTER_IDX, nom::error::ErrorKind::Fail))
-        )?;
+    let register_idx = idx.parse().map_err(|_| {
+        nom::Err::Error(nom::error::Error::new(
+            INVALID_REGISTER_IDX,
+            nom::error::ErrorKind::Fail,
+        ))
+    })?;
     match reg_type {
         "r" => {
             if register_idx > 32 {
-                return Err(nom::Err::Error(nom::error::Error::new(INVALID_REGISTER_IDX, nom::error::ErrorKind::Fail)));
+                return Err(nom::Err::Error(nom::error::Error::new(
+                    INVALID_REGISTER_IDX,
+                    nom::error::ErrorKind::Fail,
+                )));
             } else {
                 Ok((rem, SwppRegisterName::Gen(register_idx)))
             }
         }
         "v" => {
             if register_idx > 16 {
-                return Err(nom::Err::Error(nom::error::Error::new(INVALID_REGISTER_IDX, nom::error::ErrorKind::Fail)));
+                return Err(nom::Err::Error(nom::error::Error::new(
+                    INVALID_REGISTER_IDX,
+                    nom::error::ErrorKind::Fail,
+                )));
             } else {
                 Ok((rem, SwppRegisterName::Vec(register_idx)))
             }
         }
         "arg" => {
             if register_idx > 16 {
-                return Err(nom::Err::Error(nom::error::Error::new(INVALID_REGISTER_IDX, nom::error::ErrorKind::Fail)));
+                return Err(nom::Err::Error(nom::error::Error::new(
+                    INVALID_REGISTER_IDX,
+                    nom::error::ErrorKind::Fail,
+                )));
             } else {
                 Ok((rem, SwppRegisterName::Argument(register_idx)))
             }

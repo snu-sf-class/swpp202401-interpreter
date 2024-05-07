@@ -48,6 +48,9 @@ pub fn size_parser(input: &str) -> IResult<&str, Option<AccessSize>> {
 }
 
 #[inline]
-pub fn gen_nom_err(error_str : &'static str)->nom::Err<nom::error::Error<&'static str>>{
-    nom::Err::Error(nom::error::Error::new(error_str, nom::error::ErrorKind::Fail))
+pub fn gen_nom_err(error_str: &'static str) -> nom::Err<nom::error::Error<&'static str>> {
+    nom::Err::Error(nom::error::Error::new(
+        error_str,
+        nom::error::ErrorKind::Fail,
+    ))
 }

@@ -139,13 +139,11 @@ fn switch_parser(input: &str) -> IResult<&str, SwppInst> {
 
     let jump_vec = jump_vec
         .into_iter()
-        .map(|(val, block)| 
-            match val.parse(){
-                Ok(cst) => Ok((cst, block.to_owned())),
-                Err(_) => Err(gen_nom_err(&INVALID_CONST)),
-            }
-        )
-        .collect::<Result<HashMap<u64,String>,_>>()?;
+        .map(|(val, block)| match val.parse() {
+            Ok(cst) => Ok((cst, block.to_owned())),
+            Err(_) => Err(gen_nom_err(&INVALID_CONST)),
+        })
+        .collect::<Result<HashMap<u64, String>, _>>()?;
 
     let inst = InstSwitch::new(cond_reg, jump_vec, default.to_string());
     let inst = SwppInst::new(SwppInstKind::Switch(inst), line_num);
@@ -582,12 +580,7 @@ fn icmp_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, reg2) = preceded(space0, reg_parser)(rem)?;
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
 
-    
-
     let bw = bw.ok_or(gen_nom_err(INVALID_BW))?;
-
-
-
 
     let inst = match op {
         "icmp" => {
@@ -619,11 +612,9 @@ fn ternary_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, false_reg) = preceded(space0, reg_parser)(rem)?;
     let inst = InstTernary::new(false_reg, true_reg, cond_reg, target);
     let inst = SwppInst::new(SwppInstKind::Select(inst), line_num);
-        
 
     Ok((rem, inst))
 }
-
 
 fn vec_ternary_parser(input: &str) -> IResult<&str, SwppInst> {
     let (input, line_num) = line_num_parser(input)?;
