@@ -669,7 +669,7 @@ fn broadcast_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
     let bw = bw.ok_or(gen_nom_err(INVALID_BW))?;
 
-    let inst = InstVectorBroadcast::new(target, reg, bw);
+    let inst = InstVectorBroadcast::new(reg, target, bw);
     let inst = SwppInst::new(SwppInstKind::Vbcast(inst), line_num);
     Ok((rem, inst))
 }

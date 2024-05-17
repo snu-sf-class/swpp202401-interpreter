@@ -1299,13 +1299,13 @@ impl InstVectorLoad {
 
         let cost = if addr <= MEM_STACK_SIZE {
             for i in 0..4 {
-                let block = state.read_from_stack(addr + i, AccessSize::Eight)?;
+                let block = state.read_from_stack(addr + i*8, AccessSize::Eight)?;
                 target.set_u64(i as usize, block);
             }
             60
         } else if addr >= HEAP_OFFSET {
             for i in 0..4 {
-                let block = state.read_from_heap(addr + i, AccessSize::Eight)?;
+                let block = state.read_from_heap(addr + i*8, AccessSize::Eight)?;
                 target.set_u64(i as usize, block);
             }
             100
@@ -1334,15 +1334,15 @@ impl InstVectorStore {
         let vec_val = reg_set.read_register_vec(&self.vec_reg)?;
 
         let cost = if addr <= MEM_STACK_SIZE {
-            for i in 0..4 {
-                let vec_block = vec_val.get_u64(i);
-                state.write_to_stack(addr, vec_block, AccessSize::Eight)?;
+            for i in 0..4_u64 {
+                let vec_block = vec_val.get_u64(i as usize);
+                state.write_to_stack(addr+i*8, vec_block, AccessSize::Eight)?;
             }
             60
         } else if addr >= HEAP_OFFSET {
-            for i in 0..4 {
-                let vec_block = vec_val.get_u64(i);
-                state.write_to_heap(addr, vec_block, AccessSize::Eight)?;
+            for i in 0..4_u64 {
+                let vec_block = vec_val.get_u64(i as usize);
+                state.write_to_heap(addr+i*8, vec_block, AccessSize::Eight)?;
             }
             100
         } else {
