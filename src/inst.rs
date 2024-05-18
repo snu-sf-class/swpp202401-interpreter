@@ -1671,8 +1671,34 @@ impl InstComparison {
     pub fn run(&self, reg_set: &mut SwppRegisterSet) -> SwppRawResult<()> {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
-
-        let val = self.cond.compare_u64(val1, val2) as u64;
+        
+        let val = match self.bw{
+            BitWidth::Bit => {
+                let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) !=0;
+                let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) !=0;
+                self.cond.compare_bit(val1, val2) as u64
+            },
+            BitWidth::Byte => {
+                let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) as u8;
+                let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) as u8;
+                self.cond.compare_u8(val1, val2) as u64
+            },
+            BitWidth::Short => {
+                let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) as u16;
+                let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) as u16;
+                self.cond.compare_u16(val1, val2) as u64
+            },
+            BitWidth::Quad => {
+                let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) as u32;
+                let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) as u32;
+                self.cond.compare_u32(val1, val2) as u64
+            },
+            BitWidth::Full => {
+                let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) as u64;
+                let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) as u64;
+                self.cond.compare_u64(val1, val2) as u64
+            },
+        };
 
         reg_set.write_register_word(&self.target_reg, val)
     }
