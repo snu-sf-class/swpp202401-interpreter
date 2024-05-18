@@ -1,5 +1,6 @@
 /target
 /test_case
+/swpp202401-benchmarks
 
 *.json
 *.log
