@@ -167,6 +167,60 @@ impl ICMP {
             ICMP::Sle => rhs_s <= lhs_s,
         }
     }
+
+    pub fn compare_u16(&self, rhs: u16, lhs: u16) -> bool {
+        let rhs_s: i16 = unsafe { std::mem::transmute(rhs) };
+        let lhs_s: i16 = unsafe { std::mem::transmute(lhs) };
+
+        match self {
+            ICMP::Eq => rhs == lhs,
+            ICMP::Ne => rhs != lhs,
+            ICMP::Ugt => rhs > lhs,
+            ICMP::Uge => rhs >= lhs,
+            ICMP::Ult => rhs < lhs,
+            ICMP::Ule => rhs <= lhs,
+            ICMP::Sgt => rhs_s > lhs_s,
+            ICMP::Sge => rhs_s >= lhs_s,
+            ICMP::Slt => rhs_s < lhs_s,
+            ICMP::Sle => rhs_s <= lhs_s,
+        }
+    }
+
+    pub fn compare_u8(&self, rhs: u8, lhs: u8) -> bool {
+        let rhs_s: i8 = unsafe { std::mem::transmute(rhs) };
+        let lhs_s: i8 = unsafe { std::mem::transmute(lhs) };
+
+        match self {
+            ICMP::Eq => rhs == lhs,
+            ICMP::Ne => rhs != lhs,
+            ICMP::Ugt => rhs > lhs,
+            ICMP::Uge => rhs >= lhs,
+            ICMP::Ult => rhs < lhs,
+            ICMP::Ule => rhs <= lhs,
+            ICMP::Sgt => rhs_s > lhs_s,
+            ICMP::Sge => rhs_s >= lhs_s,
+            ICMP::Slt => rhs_s < lhs_s,
+            ICMP::Sle => rhs_s <= lhs_s,
+        }
+    }
+
+    pub fn compare_bit(&self, rhs: bool, lhs: bool) -> bool {
+        let rhs = rhs as u8;
+        let lhs = lhs as u8;
+
+        match self {
+            ICMP::Eq => rhs == lhs,
+            ICMP::Ne => rhs != lhs,
+            ICMP::Ugt => rhs > lhs,
+            ICMP::Uge => rhs >= lhs,
+            ICMP::Ult => rhs < lhs,
+            ICMP::Ule => rhs <= lhs,
+            ICMP::Sgt => rhs > lhs,
+            ICMP::Sge => rhs >= lhs,
+            ICMP::Slt => rhs < lhs,
+            ICMP::Sle => rhs <= lhs,
+        }
+    }
 }
 
 /// 상수일 수도 있는 포지션을 위한 값
