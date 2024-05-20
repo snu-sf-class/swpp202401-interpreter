@@ -5,6 +5,7 @@ pub const INTERNAL_ERROR_MSG: &str =
     "Internal Logic Error. If students find this bug, please tell TAs.";
 pub const HEAP_OFFSET: u64 = 204800;
 pub const MAX_HEAP_SIZE: u64 = u64::MAX - HEAP_OFFSET;
+pub const NULL_ADDR : u64 = 153600;
 
 #[derive(Debug, Clone, Copy)]
 pub enum AccessSize {
