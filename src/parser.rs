@@ -8,6 +8,7 @@ use nom::{
     branch::alt,
     bytes::complete::{tag, take_while},
     character::complete::{digit1, multispace0, newline, space0},
+    combinator::peek,
     multi::many0,
     sequence::terminated,
     IResult,
@@ -28,20 +29,21 @@ fn comment_parser(input: &str) -> IResult<&str, ParserResult> {
     let (rem, _) = line_num_parser(input)?;
     let (rem, _) = space0(rem)?;
     let (rem, _) = tag(";")(rem)?;
+    let (rem, _) = space0(rem)?;
     let (rem, _) = take_while(|c| c != '\n')(rem)?;
     Ok((rem, ParserResult::Comment))
 }
 
 fn empty_parser(input: &str) -> IResult<&str, ParserResult> {
     let (rem, _) = line_num_parser(input)?;
-    let (rem, _) = newline(rem)?;
-
+    let (rem, _) = space0(rem)?;
+    let (rem, _) = peek(newline)(rem)?;
     Ok((rem, ParserResult::Comment))
 }
 
 fn comment_empty_parser(input: &str) -> IResult<&str, ParserResult> {
     let (rem, _) = alt((comment_parser, empty_parser))(input)?;
-    let (rem, _) = multispace0(rem)?;
+    let (rem, _) = space0(rem)?;
     Ok((rem, ParserResult::Comment))
 }
 
@@ -50,7 +52,7 @@ fn commnet_empty_parser_test() {
     println!(
         "{:?}",
         comment_empty_parser(
-            "23:
+            "23:; unreachable
     24:start main 0:
     25:.entry:
     26:r1 = call read

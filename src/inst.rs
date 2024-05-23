@@ -1299,13 +1299,13 @@ impl InstVectorLoad {
 
         let cost = if addr <= MEM_STACK_SIZE {
             for i in 0..4 {
-                let block = state.read_from_stack(addr + i*8, AccessSize::Eight)?;
+                let block = state.read_from_stack(addr + i * 8, AccessSize::Eight)?;
                 target.set_u64(i as usize, block);
             }
             60
         } else if addr >= HEAP_OFFSET {
             for i in 0..4 {
-                let block = state.read_from_heap(addr + i*8, AccessSize::Eight)?;
+                let block = state.read_from_heap(addr + i * 8, AccessSize::Eight)?;
                 target.set_u64(i as usize, block);
             }
             100
@@ -1336,13 +1336,13 @@ impl InstVectorStore {
         let cost = if addr <= MEM_STACK_SIZE {
             for i in 0..4_u64 {
                 let vec_block = vec_val.get_u64(i as usize);
-                state.write_to_stack(addr+i*8, vec_block, AccessSize::Eight)?;
+                state.write_to_stack(addr + i * 8, vec_block, AccessSize::Eight)?;
             }
             60
         } else if addr >= HEAP_OFFSET {
             for i in 0..4_u64 {
                 let vec_block = vec_val.get_u64(i as usize);
-                state.write_to_heap(addr+i*8, vec_block, AccessSize::Eight)?;
+                state.write_to_heap(addr + i * 8, vec_block, AccessSize::Eight)?;
             }
             100
         } else {
@@ -1671,33 +1671,33 @@ impl InstComparison {
     pub fn run(&self, reg_set: &mut SwppRegisterSet) -> SwppRawResult<()> {
         let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?);
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
-        
-        let val = match self.bw{
+
+        let val = match self.bw {
             BitWidth::Bit => {
-                let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) !=0;
-                let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) !=0;
+                let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) != 0;
+                let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) != 0;
                 self.cond.compare_bit(val1, val2) as u64
-            },
+            }
             BitWidth::Byte => {
                 let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) as u8;
                 let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) as u8;
                 self.cond.compare_u8(val1, val2) as u64
-            },
+            }
             BitWidth::Short => {
                 let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) as u16;
                 let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) as u16;
                 self.cond.compare_u16(val1, val2) as u64
-            },
+            }
             BitWidth::Quad => {
                 let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) as u32;
                 let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) as u32;
                 self.cond.compare_u32(val1, val2) as u64
-            },
+            }
             BitWidth::Full => {
                 let val1 = self.bw.read_u64(reg_set.read_register_word(&self.reg1)?) as u64;
                 let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?) as u64;
                 self.cond.compare_u64(val1, val2) as u64
-            },
+            }
         };
 
         reg_set.write_register_word(&self.target_reg, val)

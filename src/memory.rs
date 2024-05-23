@@ -29,7 +29,9 @@ impl SwppMemory {
     }
 
     pub fn free(&mut self, addr: u64) -> SwppRawResult<()> {
-        if addr == NULL_ADDR { return  Ok(());}
+        if addr == NULL_ADDR {
+            return Ok(());
+        }
         if addr < HEAP_OFFSET {
             return Err(SwppErrorKind::InvalidAddr(addr));
         }
