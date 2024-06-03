@@ -97,14 +97,14 @@ impl VecReg {
     }
 
     pub fn get_u32(&self, idx: usize) -> u32 {
-        let inner_slice = self.inner.as_slice();
-        let inner_slice_u32: &[u32] = unsafe { std::mem::transmute(inner_slice) };
+        let inner_slice = &self.inner;
+        let inner_slice_u32: &[u32;8] = unsafe { std::mem::transmute(inner_slice) };
         inner_slice_u32[idx]
     }
 
     pub fn set_u32(&mut self, idx: usize, val: u32) {
-        let inner_slice = self.inner.as_mut_slice();
-        let inner_slice_u32: &mut [u32] = unsafe { std::mem::transmute(inner_slice) };
+        let inner_slice = &mut self.inner;
+        let inner_slice_u32: &mut [u32;8] = unsafe { std::mem::transmute(inner_slice) };
         inner_slice_u32[idx] = val;
     }
 }
