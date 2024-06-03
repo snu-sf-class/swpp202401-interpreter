@@ -624,19 +624,19 @@ fn vec_ternary_parser(input: &str) -> IResult<&str, SwppInst> {
     let (rem, op) = alt((tag("vselect"), tag("vpselect")))(rem)?;
 
     let (rem, cond_reg) = preceded(space0, reg_parser)(rem)?;
-    let (rem, true_reg) = preceded(space0, reg_parser)(rem)?;
-    let (rem, false_reg) = preceded(space0, reg_parser)(rem)?;
+    let (rem, first_reg) = preceded(space0, reg_parser)(rem)?;
+    let (rem, second_reg) = preceded(space0, reg_parser)(rem)?;
 
     let (rem, bw) = preceded(space0, bitwidth_parser)(rem)?;
     let bw = bw.ok_or(gen_nom_err(INVALID_BW))?;
 
     let inst = match op {
         "vselect" => {
-            let inst = InstVectorTernary::new(false_reg, true_reg, cond_reg, target, bw);
+            let inst = InstVectorTernary::new(first_reg, second_reg, cond_reg, target, bw);
             SwppInst::new(SwppInstKind::Vselect(inst), line_num)
         }
         "vpselect" => {
-            let inst = InstParallelVectorTernary::new(false_reg, true_reg, cond_reg, target, bw);
+            let inst = InstParallelVectorTernary::new(first_reg, second_reg, cond_reg, target, bw);
             SwppInst::new(SwppInstKind::Vpselect(inst), line_num)
         }
         _ => unreachable!(),
