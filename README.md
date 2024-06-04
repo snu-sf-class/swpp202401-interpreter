@@ -14,3 +14,5 @@ Now you have several options.
 - `cargo run --release -- [Assembly File path]`: run the interpreter directly.
 
 - `cargo build --release`: build the binary at `./target/release/main`.
+
+- `cargo run --release --features="log -- [Assembly File path]"`: run the interpreter with making simple log file.
