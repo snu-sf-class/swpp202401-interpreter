@@ -15,4 +15,4 @@ Now you have several options.
 
 - `cargo build --release`: build the binary at `./target/release/main`.
 
-- `cargo run --release --features="log -- [Assembly File path]"`: run the interpreter with making simple log file `swpp-interpreter-basic.log`.
+- `cargo run --release --features="log" -- [Assembly File path]"`: run the interpreter with making simple log file `swpp-interpreter-basic.log`.
