@@ -16,5 +16,3 @@ text_io = "0.1.12"
 
 [features]
 log = []
-verbose_log = ["log"]
-total_log = ["log"]

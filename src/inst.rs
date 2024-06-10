@@ -27,7 +27,7 @@ impl SwppInst {
         logger: &mut SwppLogger,
     ) -> SwppResult<Option<BlockResult>> {
         let inst_name = self.kind.variant_name();
-        logger.log_verbose(&reg_set);
+        // logger.log_verbose(&reg_set);
         match &self.kind {
             SwppInstKind::Ret(ret) => {
                 state.add_cost(1);
@@ -1228,9 +1228,9 @@ impl InstLoad {
             return Err(SwppErrorKind::InvalidAddr(addr));
         };
 
-        logger.log_mem_trace(format!(
-            "Load the data {val} from Adress {addr} with size {size}\n"
-        ));
+        // logger.log_mem_trace(format!(
+        //     "Load the data {val} from Adress {addr} with size {size}\n"
+        // ));
 
         reg_set
             .write_register_word(&self.target_reg, val)
@@ -1272,9 +1272,9 @@ impl InstStore {
             return Err(SwppErrorKind::InvalidAddr(addr));
         };
 
-        logger.log_mem_trace(format!(
-            "Store the data {val} into Adress {addr} with size {size}\n"
-        ));
+        // logger.log_mem_trace(format!(
+        //     "Store the data {val} into Adress {addr} with size {size}\n"
+        // ));
 
         Ok(cost)
     }
@@ -1367,7 +1367,7 @@ impl InstUnsignedDivision {
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
         let val = self.bw.read_u64(val1 / val2);
 
-        logger.log_op(format!("{val1}/{val2} = {val}"));
+        // logger.log_op(format!("{val1}/{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
     }
@@ -1391,7 +1391,7 @@ impl InstSignedDivision {
         let val2: i64 = unsafe { std::mem::transmute(val2) };
 
         let val = self.bw.read_i64(val1 / val2);
-        logger.log_op(format!("{val1}/{val2} = {val}"));
+        // logger.log_op(format!("{val1}/{val2} = {val}"));
 
         let val = unsafe { std::mem::transmute(val) };
 
@@ -1415,7 +1415,7 @@ impl InstUnsignedRemainder {
 
         let val = self.bw.read_u64(val1 % val2);
 
-        logger.log_op(format!("{val1}%{val2} = {val}"));
+        // logger.log_op(format!("{val1}%{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
     }
@@ -1439,7 +1439,7 @@ impl InstSignedRemainder {
 
         let val = self.bw.read_i64(val1 % val2);
 
-        logger.log_op(format!("{val1}%{val2} = {val}"));
+        // logger.log_op(format!("{val1}%{val2} = {val}"));
 
         let val = unsafe { std::mem::transmute(val) };
 
@@ -1463,7 +1463,7 @@ impl InstMultiplication {
 
         let val = self.bw.read_u64(val1.wrapping_mul(val2));
 
-        logger.log_op(format!("{val1}*{val2} = {val}"));
+        // logger.log_op(format!("{val1}*{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
     }
@@ -1484,7 +1484,7 @@ impl InstShiftLeft {
 
         let val = self.bw.read_u64(val1 << val2);
 
-        logger.log_op(format!("{val1}<<{val2} = {val}"));
+        // logger.log_op(format!("{val1}<<{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
     }
@@ -1505,7 +1505,7 @@ impl InstShiftRightLogical {
 
         let val = self.bw.read_u64(val1 >> val2);
 
-        logger.log_op(format!("{val1}>>{val2} = {val}"));
+        // logger.log_op(format!("{val1}>>{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
     }
@@ -1527,7 +1527,7 @@ impl InstShiftRightArithmetic {
         let val1: i64 = unsafe { std::mem::transmute(val1) };
 
         let val = self.bw.read_i64(val1 >> val2);
-        logger.log_op(format!("{val1}>>{val2} = {val}"));
+        // logger.log_op(format!("{val1}>>{val2} = {val}"));
         let val = unsafe { std::mem::transmute(val) };
         reg_set.write_register_word(&self.target_reg, val)
     }
@@ -1598,7 +1598,7 @@ impl InstAdd {
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
         let val = self.bw.read_u64(val1.wrapping_add(val2));
-        logger.log_op(format!("{val1}+{val2} = {val}"));
+        // logger.log_op(format!("{val1}+{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
     }
@@ -1618,7 +1618,7 @@ impl InstSub {
         let val2 = self.bw.read_u64(reg_set.read_register_word(&self.reg2)?);
 
         let val = self.bw.read_u64(val1.wrapping_sub(val2));
-        logger.log_op(format!("{val1}-{val2} = {val}"));
+        // logger.log_op(format!("{val1}-{val2} = {val}"));
 
         reg_set.write_register_word(&self.target_reg, val)
     }
