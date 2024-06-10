@@ -561,7 +561,7 @@ fn icmp_parser(input: &str) -> IResult<&str, SwppInst> {
     let (input, line_num) = line_num_parser(input)?;
     let (rem, target) = reg_parser(input)?;
     let (rem, _) = tuple((space0, tag("="), space0))(rem)?;
-    let (rem, op) = alt((tag("icmp"), tag("vicmp"), tag("vpcimp")))(rem)?;
+    let (rem, op) = alt((tag("icmp"), tag("vicmp"), tag("vpicmp")))(rem)?;
     let (rem, cond) = preceded(space0, alpha1)(rem)?;
     let cond = match cond {
         "eq" => ICMP::Eq,
