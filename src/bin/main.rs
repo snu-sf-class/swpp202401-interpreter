@@ -1,9 +1,11 @@
-use std::{fs::File, io::Read, str::from_utf8};
+use std::{fs::File, io::{Read, Write}, str::from_utf8};
 
 use swpp_interpreter::{parser::total_program_parser, program::SwppProgram};
 
 fn main() {
     let asm_path = std::env::args().nth(1).expect("no Assembly file link");
+    
+    let cost_path = std::env::args().nth(2).expect("no Cost file link");
 
     let mut asm_file = File::options()
         .read(true)
@@ -37,5 +39,15 @@ fn main() {
         panic!()
     });
 
-    println!("Final Cost : {}", program.total_cost())
+    
+    let mut cost_file = File::options()
+        .write(true)
+        .create(true)
+        .open(&cost_path)
+        .expect(&format!("Fail to open Cost file : {}", asm_path));
+
+    let final_cost = format!("Final Cost : {}", program.total_cost());
+
+    cost_file.write(final_cost.as_bytes()).unwrap();
+
 }

@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cargo run --release --features="verbose_log" ./test_case/test.s < ./test_case/input.txt
+cargo run --release -- ./test_case/test.s ./cost.txt < ./test_case/input.txt
